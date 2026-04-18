@@ -1,0 +1,39 @@
+package com.yumka.demo.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class ProducerResponse {
+     @NotNull
+    @JsonProperty("id")
+    private UUID id;
+
+    @NotNull
+    @JsonProperty("user_id")
+    private UUID userId;
+
+    @NotBlank
+    @JsonProperty("business_name")
+    private String businessName;
+
+    @JsonProperty("description")
+    private String description;
+
+    @JsonProperty("location")
+    private String location;
+}
