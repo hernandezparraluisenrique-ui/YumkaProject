@@ -11,19 +11,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderResponse  {
+public class PaymentResponse {
     @NotNull
-    @JsonProperty("order_id")
-    private UUID orderId;
-
-    @NotNull
-    @JsonProperty("total")
-    private Double total;
+    @JsonProperty("payment_id")
+    private UUID id;
 
     @NotBlank
     @JsonProperty("status")

@@ -6,26 +6,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OrderResponse  {
-    @NotNull
+public class PaymentRequest {
+
+    @NotNull(message = "Order ID is required")
     @JsonProperty("order_id")
     private UUID orderId;
 
-    @NotNull
-    @JsonProperty("total")
-    private Double total;
-
-    @NotBlank
-    @JsonProperty("status")
-    private String status;
+    @NotBlank(message = "Payment method is required")
+    @JsonProperty("method")
+    private String method;
 }

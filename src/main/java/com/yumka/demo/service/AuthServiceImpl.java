@@ -2,49 +2,42 @@ package com.yumka.demo.service;
 
 import java.time.LocalDateTime;
 
-import com.yumka.demo.dto.AuthRequest;
-import com.yumka.demo.dto.AuthResponse;
-import com.yumka.demo.model.UserAuth;
-import com.yumka.demo.repository.UserAuthRepository;
+import com.yumka.demo.model.UserRef;
+
+import com.yumka.demo.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import jakarta.transaction.Transactional;
-import com.yumka.demo.model.UserRef;
+
 
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    private final UserAuthRepository repository;
+     private final GoogleAuthService googleService;
+    private final UserRepository userRepository;
     private final JwtService jwtService;
-    private final UserRefService userRefService;
 
+    // 🔹 Login con Google
     @Override
-    @Transactional
-    public AuthResponse login(AuthRequest request) {
+    public String loginWithGoogle(String idToken) {
 
-        UserAuth user = repository.findByGoogleId(request.getGoogleId())
-                .orElseGet(() -> {
-                    UserAuth newUser = UserAuth.builder()
-                            .googleId(request.getGoogleId())
-                            .email(request.getEmail())
-                            .name(request.getName())
-                            .photo(request.getPhoto())
-                            .role("USER")
-                            .createdAt(LocalDateTime.now())
-                            .build();
-                    return repository.save(newUser);
-                });
+        var payload = googleService.verifyToken(idToken);
 
-        // 🔥 sincroniza con PostgreSQL
-        userRefService.createIfNotExists(user.getEmail(), user.getName());
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
 
-        String token = jwtService.generateToken(user);
+        // 🔹 Buscar o crear usuario
+        UserRef user = userRepository.findByEmail(email)
+                .orElseGet(() -> userRepository.save(
+                        UserRef.builder()
+                                .email(email)
+                                .fullName(name)
+                                .createdAt(LocalDateTime.now())
+                                .build()
+                ));
 
-        return AuthResponse.builder()
-                .token(token)
-                .role(user.getRole())
-                .build();
+        // 🔹 Generar JWT
+        return jwtService.generateToken(user);
     }
 }

@@ -8,23 +8,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yumka.demo.dto.AuthRequest;
 import com.yumka.demo.dto.AuthResponse;
+import com.yumka.demo.dto.GoogleLoginRequest;
 import com.yumka.demo.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
-     private final AuthService service;
+private final AuthService authService;
 
-    @PostMapping("/login")
-    @Operation(summary = "Login with Google")
-    @ApiResponse(responseCode = "200", description = "User authenticated successfully")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest req) {
-        return ResponseEntity.ok(service.login(req));
+    @PostMapping("/google")
+    public Map<String, String> login(@RequestBody GoogleLoginRequest request) {
+
+        String token = authService.loginWithGoogle(request.getIdToken());
+
+        return Map.of("token", token);
     }
 }

@@ -23,38 +23,33 @@ import lombok.Setter;
 
 
 
-
-@Entity
-@Table(name = "orders")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-public class Order {
-   
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "payments")
+public class Payment {
+
     @Id
     @GeneratedValue
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserRef user;
-
-    @ManyToOne
-    @JoinColumn(name = "address_id")
-    private Address address;
+    @JoinColumn(name = "order_id")
+    private Order order;
 
     @Column(nullable = false)
-    private BigDecimal total;
+    private BigDecimal amount;
 
     @Column(nullable = false)
-    private String status;
+    private String status; // PENDING, COMPLETED, FAILED
+
+    @Column(nullable = false)
+    private String method; // CARD, CASH, TRANSFER
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> items;
 }

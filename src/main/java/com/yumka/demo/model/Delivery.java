@@ -1,42 +1,43 @@
 package com.yumka.demo.model;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
-
-@Entity
-@Table(name = "order_items")
 @Data
-@Builder
+@Getter
+@Setter
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItem {
-  
+@Builder
+@Table(name = "deliveries")
+public class Delivery {
     @Id
     @GeneratedValue
     private UUID id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @Column(nullable = false)
+    private String status; // PENDING, IN_TRANSIT, DELIVERED, FAILED
 
-    private Integer quantity;
-
-    private BigDecimal price;
+    @Column(name = "estimated_time")
+    private LocalDateTime estimatedTime;
 }

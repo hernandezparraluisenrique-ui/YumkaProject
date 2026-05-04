@@ -7,11 +7,12 @@ import com.yumka.demo.dto.AuthResponse;
 
 import jakarta.transaction.Transactional;
 
-@Service
+
 @Transactional
 public interface  AuthService {
 
-     AuthResponse login(AuthRequest request);
+   // 🔹 Login con Google
+    String loginWithGoogle(String idToken);
 }
 
 

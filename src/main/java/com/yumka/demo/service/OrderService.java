@@ -11,9 +11,10 @@ import java.util.UUID;
 @Service
 @Transactional
 public interface OrderService {
-    OrderResponse create(OrderRequest request);
 
-    List<OrderResponse> getByUser(UUID userId);
+    OrderResponse createOrderFromCart(UUID userId, UUID addressId);
 
-    OrderResponse findById(UUID orderId);
+    List<OrderResponse> findByUser(UUID userId);
+
+    List<OrderResponse> findByProducer(UUID producerId);
 }

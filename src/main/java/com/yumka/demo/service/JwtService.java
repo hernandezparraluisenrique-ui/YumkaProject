@@ -3,20 +3,25 @@ package com.yumka.demo.service;
 import java.util.Date;
 
 import com.yumka.demo.model.UserAuth;
+import com.yumka.demo.model.UserRef;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
+import  org.springframework.beans.factory.annotation.Value;
+
 
 @Service
 public class JwtService {
-     private final String SECRET = "secret-key";
+  @Value("${jwt.secret}")
+    private String SECRET;
 
-    public String generateToken(UserAuth user) {
+    public String generateToken(UserRef user) {
+
         return Jwts.builder()
                 .setSubject(user.getEmail())
-                .claim("role", user.getRole())
-                .claim("googleId", user.getGoogleId())
+                .claim("userId", user.getId())
+                .claim("role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(SignatureAlgorithm.HS256, SECRET)

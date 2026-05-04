@@ -1,66 +1,56 @@
 package com.yumka.demo.service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
-import com.yumka.demo.dto.OrderRequest;
+import org.springframework.stereotype.Service;
+
 import com.yumka.demo.dto.OrderResponse;
 import com.yumka.demo.mapper.OrderMapper;
 import com.yumka.demo.model.Address;
 import com.yumka.demo.model.Cart;
 import com.yumka.demo.model.CartItem;
+import com.yumka.demo.model.Order;
 import com.yumka.demo.model.OrderItem;
 import com.yumka.demo.model.Product;
+import com.yumka.demo.repository.AddressRepository;
 import com.yumka.demo.repository.CartItemRepository;
 import com.yumka.demo.repository.CartRepository;
 import com.yumka.demo.repository.OrderRepository;
 import com.yumka.demo.repository.ProductRepository;
-
+import com.yumka.demo.model.Order;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import com.yumka.demo.repository.AddressRepository;
-import com.yumka.demo.repository.OrderStatusHistoryRepository;
-imort java.util.List;
-import java.util.UUID;
-
 
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService{
-     private final CartRepository cartRepository;
+    private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final AddressRepository addressRepository;
-    private final OrderStatusHistoryRepository historyRepository;
 
     @Override
-    public OrderResponse create(OrderRequest request) {
+    public OrderResponse createOrderFromCart(UUID userId, UUID addressId) {
 
-        Cart cart = cartRepository.findByUserIdAndStatus(request.getUserId(), "CHECKOUT")
+        Cart cart = cartRepository.findByUserIdAndStatus(userId, "CHECKOUT")
                 .orElseThrow(() -> new IllegalStateException("Cart not ready"));
 
         List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
 
-        Address address = addressRepository.findById(request.getAddressId())
+        Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new EntityNotFoundException("Address not found"));
 
-        Order order = Order.builder()
-                .user(cart.getUser())
-                .address(address)
-                .status("PENDING")
-                .createdAt(LocalDateTime.now())
-                .build();
+        Order order = OrderMapper.toEntity(null, cart.getUser(), address);
 
         List<OrderItem> orderItems = items.stream().map(i -> {
-
             Product p = i.getProduct();
 
-            if (p.getStock() < i.getQuantity()) {
-                throw new IllegalStateException("Not enough stock");
-            }
+            if (p.getStock() < i.getQuantity())
+                throw new IllegalStateException("Stock error");
 
             p.setStock(p.getStock() - i.getQuantity());
             productRepository.save(p);
@@ -71,7 +61,6 @@ public class OrderServiceImpl implements OrderService{
                     .quantity(i.getQuantity())
                     .price(p.getPrice())
                     .build();
-
         }).toList();
 
         BigDecimal total = orderItems.stream()
@@ -81,33 +70,18 @@ public class OrderServiceImpl implements OrderService{
         order.setTotal(total);
         order.setItems(orderItems);
 
-        Order saved = orderRepository.save(order);
-
-        historyRepository.save(OrderStatusHistory.builder()
-                .order(saved)
-                .status("PENDING")
-                .changedAt(LocalDateTime.now())
-                .build());
-
-        cart.setStatus("CLOSED");
-        cartRepository.save(cart);
-
-        return OrderMapper.toResponse(saved);
+        return OrderMapper.toResponse(orderRepository.save(order));
     }
 
     @Override
-    public List<OrderResponse> getByUser(UUID userId) {
+    public List<OrderResponse> findByUser(UUID userId) {
         return orderRepository.findByUser(userId)
-                .stream()
-                .map(OrderMapper::toResponse)
-                .toList();
+                .stream().map(OrderMapper::toResponse).toList();
     }
 
     @Override
-    public OrderResponse findById(UUID orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-
-        return OrderMapper.toResponse(order);
+    public List<OrderResponse> findByProducer(UUID producerId) {
+        return orderRepository.findByProducer(producerId)
+                .stream().map(OrderMapper::toResponse).toList();
     }
 }

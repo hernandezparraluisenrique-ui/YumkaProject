@@ -1,31 +1,24 @@
 package com.yumka.demo.dto;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderResponse  {
-    @NotNull
-    @JsonProperty("order_id")
-    private UUID orderId;
-
-    @NotNull
-    @JsonProperty("total")
-    private Double total;
-
-    @NotBlank
+public class OrderStatusHistoryResponse {
+    
     @JsonProperty("status")
     private String status;
+
+    @JsonProperty("changed_at")
+    private LocalDateTime changedAt;
 }
